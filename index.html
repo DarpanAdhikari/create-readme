@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>README Builder - Classic</title>
+
+<!-- CodeMirror 5 CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/idea.min.css">
+
+<style>
+body{font-family:'Segoe UI',sans-serif;margin:0;height:100vh;display:flex;flex-direction:column;background:#fff;color:#111;}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:#f0f0f0;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+header h3{font-weight:600;}
+header button{background:#1e293b;color:#fff;border:none;padding:8px 12px;margin-left:6px;border-radius:6px;cursor:pointer;transition:0.2s;}
+header button:hover{background:#3b82f6;}
+.container{display:flex;flex:1;overflow:hidden;}
+.panel{flex:1;display:flex;flex-direction:column;padding:16px;overflow:hidden;margin:10px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.05);background:#fff;}
+#preview{flex:1;overflow-y:auto;padding:16px;border-radius:10px;background:#f9f9f9;box-shadow:inset 0 0 6px rgba(0,0,0,0.03);}
+#preview h1,#preview h2,#preview h3,#preview h4{color:#111;}
+#preview a{color:#2563eb;}
+#preview pre code{background:#eee;padding:4px 8px;border-radius:6px;}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+.toolbar select,.toolbar input,.toolbar button{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;transition:0.2s;}
+.toolbar select:hover,.toolbar input:hover,.toolbar button:hover{border-color:#3b82f6;}
+.resizer{width:5px;cursor:col-resize;background:#e2e2e2;border-radius:2px;transition:0.2s;}
+.resizer:hover{background:#3b82f6;}
+.CodeMirror{height:100%;border-radius:10px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h3>README Builder</h3>
+  <div>
+    <button id="copyBtn">📋 Copy</button>
+    <button id="downloadBtn">⬇️ .md</button>
+    <button id="pdfBtn">📄 PDF</button>
+    <button id="chooseFileBtn">📂 Choose File</button>
+    <input type="file" id="fileInput" style="display:none;" accept=".md,.txt">
+  </div>
+</header>
+
+<div class="container">
+  <div class="panel" id="editorPanel">
+    <div class="toolbar">
+      <select id="template">
+        <option value="">Choose Template</option>
+        <option value="basic">Basic</option>
+        <option value="portfolio">Portfolio</option>
+        <option value="api">API</option>
+      </select>
+      <input id="badge" placeholder="Badge text (version-1.0-blue)">
+      <button id="applyTemplateBtn">Apply Template</button>
+    </div>
+    <textarea id="editor"></textarea>
+  </div>
+
+  <div class="resizer" id="resizer"></div>
+
+  <div class="panel" id="previewPanel">
+    <h4>Preview</h4>
+    <div id="preview"></div>
+  </div>
+</div>
+
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+let editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+  mode: "markdown",
+  theme: "idea",
+  lineNumbers: true,
+  lineWrapping: true
+});
+
+function updatePreview(){
+  const badgeText = document.getElementById("badge").value.trim();
+  const badgeMd = badgeText ? `![badge](https://img.shields.io/badge/${badgeText})\n\n` : "";
+  const md = badgeMd + editor.getValue();
+  document.getElementById("preview").innerHTML = marked.parse(md);
+  localStorage.setItem("readmeContent", editor.getValue());
+}
+
+editor.on("change", updatePreview);
+document.getElementById("badge").addEventListener("input", updatePreview);
+
+// Templates
+document.getElementById("applyTemplateBtn").addEventListener("click", ()=>{
+  const t = document.getElementById("template").value;
+  let content = "";
+  if(t==="basic") content = `# Project Title\n\nShort description.\n\n## Installation\n\`\`\`bash\nnpm install\n\`\`\`\n\n## Usage\nExplain here.\n\n## License\nMIT`;
+  if(t==="portfolio") content = `# 👋 Hi\n\n### About Me\nA short intro.\n\n### Skills\n- HTML\n- CSS\n- JS\n\n### Projects\n- Awesome app`;
+  if(t==="api") content = `# API Docs\n\n## Endpoints\nGET /api/items\n\n## Response\n\`\`\`json\n[]\n\`\`\``;
+  editor.setValue(content);
+  updatePreview();
+});
+
+// Buttons
+document.getElementById("copyBtn").addEventListener("click", ()=>navigator.clipboard.writeText(editor.getValue()));
+document.getElementById("downloadBtn").addEventListener("click", ()=>{
+  const a=document.createElement("a");
+  a.href="data:text/markdown;charset=utf-8,"+encodeURIComponent(editor.getValue());
+  a.download="README.md";
+  a.click();
+});
+document.getElementById("pdfBtn").addEventListener("click", ()=>{
+  html2pdf().set({margin:0.5, filename:'README.pdf', html2canvas:{scale:2}, jsPDF:{unit:'in', format:'letter', orientation:'portrait'}})
+    .from(document.getElementById("preview")).save();
+});
+
+// File upload
+const fileInput = document.getElementById('fileInput');
+document.getElementById('chooseFileBtn').addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      editor.setValue(ev.target.result);
+      updatePreview();
+    };
+    reader.readAsText(file);
+  }
+});
+
+// Load saved content
+editor.setValue(localStorage.getItem("readmeContent") || "");
+updatePreview();
+
+// Resizer
+const resizer = document.getElementById('resizer');
+const leftPanel = document.getElementById('editorPanel');
+const container = document.querySelector('.container');
+let isResizing = false;
+resizer.addEventListener('mousedown',()=>isResizing=true);
+document.addEventListener('mousemove', e=>{
+  if(!isResizing) return;
+  leftPanel.style.flex='none';
+  leftPanel.style.width = e.clientX + 'px';
+});
+document.addEventListener('mouseup',()=>isResizing=false);
+</script>
+
+</body>
+</html>
