@@ -102,11 +102,33 @@ document.getElementById("applyTemplateBtn").addEventListener("click", ()=>{
 
 // Buttons
 document.getElementById("copyBtn").addEventListener("click", ()=>navigator.clipboard.writeText(editor.getValue()));
-document.getElementById("downloadBtn").addEventListener("click", ()=>{
-  const a=document.createElement("a");
-  a.href="data:text/markdown;charset=utf-8,"+encodeURIComponent(editor.getValue());
-  a.download="README.md";
-  a.click();
+document.getElementById("downloadBtn").addEventListener("click", async () => {
+  const content = editor.getValue();
+
+  // If browser supports native save dialog
+  if (window.showSaveFilePicker) {
+    const opts = {
+      suggestedName: "README.md",
+      types: [{
+        description: "Markdown File",
+        accept: { "text/markdown": [".md"] }
+      }]
+    };
+
+    const handle = await window.showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(content);
+    await writable.close();
+
+  } else {
+    // Fallback for unsupported browsers
+    alert("Your browser doesn't support native save. File will download as README.md");
+
+    const a = document.createElement("a");
+    a.href = "data:text/markdown;charset=utf-8," + encodeURIComponent(content);
+    a.download = "README.md";
+    a.click();
+  }
 });
 document.getElementById("pdfBtn").addEventListener("click", ()=>{
   html2pdf().set({margin:0.5, filename:'README.pdf', html2canvas:{scale:2}, jsPDF:{unit:'in', format:'letter', orientation:'portrait'}})
@@ -148,3 +170,4 @@ document.addEventListener('mouseup',()=>isResizing=false);
 
 </body>
 </html>
+
