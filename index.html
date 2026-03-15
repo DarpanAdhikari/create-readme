@@ -166,6 +166,30 @@ document.addEventListener('mousemove', e=>{
   leftPanel.style.width = e.clientX + 'px';
 });
 document.addEventListener('mouseup',()=>isResizing=false);
+// Handle image paste or drag-drop
+editor.getWrapperElement().addEventListener('paste', handleImage);
+editor.getWrapperElement().addEventListener('drop', handleImage);
+
+function handleImage(e) {
+  const files = e.clipboardData?.files || e.dataTransfer?.files;
+  if (!files) return;
+  
+  for (let file of files) {
+    if (!file.type.startsWith('image/')) continue;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      // Insert as Markdown image at cursor
+      const doc = editor.getDoc();
+      const pos = doc.getCursor();
+      doc.replaceRange(`![image](${ev.target.result})\n`, pos);
+      updatePreview();
+    };
+    reader.readAsDataURL(file); // Convert to base64
+  }
+
+  e.preventDefault();
+}
 </script>
 
 </body>
