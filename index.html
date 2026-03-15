@@ -2,41 +2,64 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>README Builder - Classic</title>
+<title>Darpan Readme Builder Pro</title>
 
-<!-- CodeMirror 5 CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/idea.min.css">
 
 <style>
-body{font-family:'Segoe UI',sans-serif;margin:0;height:100vh;display:flex;flex-direction:column;background:#fff;color:#111;}
-header{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:#f0f0f0;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-header h3{font-weight:600;}
-header button{background:#1e293b;color:#fff;border:none;padding:8px 12px;margin-left:6px;border-radius:6px;cursor:pointer;transition:0.2s;}
-header button:hover{background:#3b82f6;}
-.container{display:flex;flex:1;overflow:hidden;}
-.panel{flex:1;display:flex;flex-direction:column;padding:16px;overflow:hidden;margin:10px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.05);background:#fff;}
-#preview{flex:1;overflow-y:auto;padding:16px;border-radius:10px;background:#f9f9f9;box-shadow:inset 0 0 6px rgba(0,0,0,0.03);}
-#preview h1,#preview h2,#preview h3,#preview h4{color:#111;}
-#preview a{color:#2563eb;}
-#preview pre code{background:#eee;padding:4px 8px;border-radius:6px;}
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
-.toolbar select,.toolbar input,.toolbar button{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;transition:0.2s;}
-.toolbar select:hover,.toolbar input:hover,.toolbar button:hover{border-color:#3b82f6;}
-.resizer{width:5px;cursor:col-resize;background:#e2e2e2;border-radius:2px;transition:0.2s;}
-.resizer:hover{background:#3b82f6;}
-.CodeMirror{height:100%;border-radius:10px;}
+  :root { --border-color: #d0d7de; --bg-gray: #f6f8fa; --link-blue: #0969da; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; background: #fff; color: #1f2328; }
+  
+  /* Header & UI */
+  header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #24292f; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  header h3 { margin: 0; font-size: 18px; font-weight: 500; }
+  header .btn-group { display: flex; gap: 8px; }
+  button { background: #3b82f6; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
+  button:hover { background: #2563eb; }
+  button.secondary { background: #4b5563; }
+  
+  .container { display: flex; flex: 1; overflow: hidden; }
+  .panel { flex: 1; display: flex; flex-direction: column; padding: 12px; overflow: hidden; }
+  
+  /* Toolbar */
+  .toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+  input, select { padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; outline: none; font-size: 13px; }
+  input:focus { border-color: var(--link-blue); box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1); }
+
+  /* Editor */
+  .CodeMirror { flex: 1; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; line-height: 1.5; }
+  
+  .resizer { width: 4px; cursor: col-resize; background: #e2e8f0; transition: 0.2s; }
+  .resizer:hover { background: var(--link-blue); }
+
+  /* GitHub-Style Previewer */
+  #preview { 
+    flex: 1; overflow-y: auto; padding: 30px; border: 1px solid var(--border-color); border-radius: 6px; 
+    line-height: 1.6; word-wrap: break-word; background: #fff;
+  }
+  #preview h1, #preview h2 { border-bottom: 1px solid #d8dee4; padding-bottom: 0.3em; margin-top: 24px; margin-bottom: 16px; font-weight: 600; }
+  #preview code { background: rgba(175, 184, 193, 0.2); padding: 0.2em 0.4em; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 85%; }
+  #preview pre { background: var(--bg-gray); padding: 16px; border-radius: 6px; overflow: auto; margin-bottom: 16px; }
+  #preview pre code { background: none; padding: 0; font-size: 100%; }
+  #preview blockquote { border-left: 0.25em solid #d0d7de; color: #636c76; padding: 0 1em; margin: 0 0 16px 0; }
+  #preview table { border-collapse: collapse; width: 100%; margin-bottom: 16px; }
+  #preview th, #preview td { border: 1px solid var(--border-color); padding: 6px 13px; }
+  #preview th { background: var(--bg-gray); }
+  #preview img { max-width: 100%; border-radius: 6px; }
+  #preview details { border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; background: var(--bg-gray); margin-bottom: 16px; }
+  #preview summary { font-weight: 600; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <header>
   <h3>README Builder</h3>
-  <div>
-    <button id="copyBtn">📋 Copy</button>
-    <button id="downloadBtn">⬇️ .md</button>
-    <button id="pdfBtn">📄 PDF</button>
-    <button id="chooseFileBtn">📂 Choose File</button>
+  <div class="btn-group">
+    <button onclick="copyMarkdown()">📋 Copy</button>
+    <button onclick="downloadMarkdown()">⬇️ .md</button>
+    <button onclick="exportPDF()" class="secondary">📄 PDF</button>
+    <button onclick="document.getElementById('fileInput').click()" class="secondary">📂 Import</button>
     <input type="file" id="fileInput" style="display:none;" accept=".md,.txt">
   </div>
 </header>
@@ -45,13 +68,13 @@ header button:hover{background:#3b82f6;}
   <div class="panel" id="editorPanel">
     <div class="toolbar">
       <select id="template">
-        <option value="">Choose Template</option>
+        <option value="">Template...</option>
         <option value="basic">Basic</option>
+        <option value="api">API Docs</option>
         <option value="portfolio">Portfolio</option>
-        <option value="api">API</option>
       </select>
-      <input id="badge" placeholder="Badge text (version-1.0-blue)">
-      <button id="applyTemplateBtn">Apply Template</button>
+      <input id="badgeInput" placeholder="Badge (e.g. build-passing-green)" style="flex:1;">
+      <button onclick="applyTemplate()">Apply</button>
     </div>
     <textarea id="editor"></textarea>
   </div>
@@ -59,139 +82,160 @@ header button:hover{background:#3b82f6;}
   <div class="resizer" id="resizer"></div>
 
   <div class="panel" id="previewPanel">
-    <h4>Preview</h4>
+    <div class="toolbar"><span style="font-weight: 600; color: #666;">Live Preview</span></div>
     <div id="preview"></div>
   </div>
 </div>
 
-<!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/markdown/markdown.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-let editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
-  mode: "markdown",
-  theme: "idea",
-  lineNumbers: true,
-  lineWrapping: true
-});
+  // --- Initialize Editor ---
+  let editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+    mode: "markdown",
+    theme: "idea",
+    lineNumbers: true,
+    lineWrapping: true,
+    extraKeys: {"Enter": "newlineAndIndentContinueMarkdownList"}
+  });
 
-function updatePreview(){
-  const badgeText = document.getElementById("badge").value.trim();
-  const badgeMd = badgeText ? `![badge](https://img.shields.io/badge/${badgeText})\n\n` : "";
-  const md = badgeMd + editor.getValue();
-  document.getElementById("preview").innerHTML = marked.parse(md);
-  localStorage.setItem("readmeContent", editor.getValue());
-}
+  const imageMap = new Map();
 
-editor.on("change", updatePreview);
-document.getElementById("badge").addEventListener("input", updatePreview);
+  // --- Logic: Process Markdown for Preview and Export ---
+  function getProcessedMarkdown() {
+    let content = editor.getValue();
 
-// Templates
-document.getElementById("applyTemplateBtn").addEventListener("click", ()=>{
-  const t = document.getElementById("template").value;
-  let content = "";
-  if(t==="basic") content = `# Project Title\n\nShort description.\n\n## Installation\n\`\`\`bash\nnpm install\n\`\`\`\n\n## Usage\nExplain here.\n\n## License\nMIT`;
-  if(t==="portfolio") content = `# 👋 Hi\n\n### About Me\nA short intro.\n\n### Skills\n- HTML\n- CSS\n- JS\n\n### Projects\n- Awesome app`;
-  if(t==="api") content = `# API Docs\n\n## Endpoints\nGET /api/items\n\n## Response\n\`\`\`json\n[]\n\`\`\``;
-  editor.setValue(content);
-  updatePreview();
-});
+    // Replace image placeholders with persistent Base64 HTML
+    imageMap.forEach((img, id) => {
+      const html = `<details>\n<summary>📸 Image: ${img.name}</summary>\n<br><img src="${img.data}" alt="${img.name}" />\n</details>`;
+      const placeholder = `![${img.name}](#${id})`;
+      content = content.split(placeholder).join(html);
+    });
 
-// Buttons
-document.getElementById("copyBtn").addEventListener("click", ()=>navigator.clipboard.writeText(editor.getValue()));
-document.getElementById("downloadBtn").addEventListener("click", async () => {
-  const content = editor.getValue();
-
-  // If browser supports native save dialog
-  if (window.showSaveFilePicker) {
-    const opts = {
-      suggestedName: "README.md",
-      types: [{
-        description: "Markdown File",
-        accept: { "text/markdown": [".md"] }
-      }]
-    };
-
-    const handle = await window.showSaveFilePicker(opts);
-    const writable = await handle.createWritable();
-    await writable.write(content);
-    await writable.close();
-
-  } else {
-    // Fallback for unsupported browsers
-    alert("Your browser doesn't support native save. File will download as README.md");
-
-    const a = document.createElement("a");
-    a.href = "data:text/markdown;charset=utf-8," + encodeURIComponent(content);
-    a.download = "README.md";
-    a.click();
+    // Add badge
+    const b = document.getElementById("badgeInput").value.trim();
+    const badgeMd = b ? `![badge](https://img.shields.io/badge/${b})\n\n` : "";
+    
+    return badgeMd + content;
   }
-});
-document.getElementById("pdfBtn").addEventListener("click", ()=>{
-  html2pdf().set({margin:0.5, filename:'README.pdf', html2canvas:{scale:2}, jsPDF:{unit:'in', format:'letter', orientation:'portrait'}})
-    .from(document.getElementById("preview")).save();
-});
 
-// File upload
-const fileInput = document.getElementById('fileInput');
-document.getElementById('chooseFileBtn').addEventListener('click', ()=>fileInput.click());
-fileInput.addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(file){
+  function updatePreview() {
+    const rawMd = getProcessedMarkdown();
+    document.getElementById("preview").innerHTML = marked.parse(rawMd);
+    localStorage.setItem("readme_autosave", editor.getValue());
+  }
+
+  editor.on("change", updatePreview);
+  document.getElementById("badgeInput").addEventListener("input", updatePreview);
+
+  // --- Image Handling (Paste/Drop) ---
+  function handleImage(e) {
+    const items = (e.clipboardData || e.dataTransfer).items;
+    let handled = false;
+    for (let item of items) {
+      if (item.type.indexOf("image") !== -1) {
+        handled = true;
+        const file = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const id = `img_${Date.now()}`;
+          imageMap.set(id, { name: file.name || 'uploaded_image', data: event.target.result });
+          const doc = editor.getDoc();
+          doc.replaceRange(`![${file.name || 'image'}](#${id})\n`, doc.getCursor());
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    if(handled) e.preventDefault();
+  }
+
+  editor.getWrapperElement().addEventListener('paste', handleImage);
+  editor.getWrapperElement().addEventListener('drop', handleImage);
+
+  // --- Buttons & Export ---
+  function copyMarkdown() {
+    navigator.clipboard.writeText(getProcessedMarkdown());
+    alert("Markdown (with images) copied!");
+  }
+
+  async function downloadMarkdown() {
+    const content = getProcessedMarkdown();
+    
+    // Check if browser supports File System Access API
+    if ('showSaveFilePicker' in window) {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: 'README.md',
+        types: [{
+          description: 'Markdown File',
+          accept: { 'text/markdown': ['.md'] }
+        }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(content);
+      await writable.close();
+      alert('File saved!');
+    } else {
+      // Fallback for older browsers
+      const blob = new Blob([content], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "README.md";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function exportPDF() {
+    const element = document.getElementById('preview');
+    html2pdf().from(element).set({
+      margin: 0.5,
+      filename: 'README.pdf',
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    }).save();
+  }
+
+  // --- Templates & File Loading ---
+  function applyTemplate() {
+    const type = document.getElementById("template").value;
+    const templates = {
+      basic: `# Project Title\n\n## Description\nWrite here.\n\n## Install\n\`npm install\``,
+      api: `# API Reference\n\n### GET /users\nReturns all users.\n\n\`\`\`json\n{ "status": 200 }\n\`\`\``,
+      portfolio: `# Hi, I'm [Name]\n\n- 🚀 Tech: React, Node\n- 🛠 Projects: Awesome App`
+    };
+    if(templates[type]) editor.setValue(templates[type]);
+  }
+
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
     const reader = new FileReader();
-    reader.onload = function(ev){
+    reader.onload = ev => {
       editor.setValue(ev.target.result);
       updatePreview();
     };
     reader.readAsText(file);
-  }
-});
+  });
 
-// Load saved content
-editor.setValue(localStorage.getItem("readmeContent") || "");
-updatePreview();
+  // Resizer Logic
+  const resizer = document.getElementById('resizer');
+  const leftPanel = document.getElementById('editorPanel');
+  let isResizing = false;
+  resizer.addEventListener('mousedown', () => isResizing = true);
+  document.addEventListener('mousemove', e => {
+    if(!isResizing) return;
+    let offset = e.clientX;
+    leftPanel.style.flex = 'none';
+    leftPanel.style.width = offset + 'px';
+  });
+  document.addEventListener('mouseup', () => isResizing = false);
 
-// Resizer
-const resizer = document.getElementById('resizer');
-const leftPanel = document.getElementById('editorPanel');
-const container = document.querySelector('.container');
-let isResizing = false;
-resizer.addEventListener('mousedown',()=>isResizing=true);
-document.addEventListener('mousemove', e=>{
-  if(!isResizing) return;
-  leftPanel.style.flex='none';
-  leftPanel.style.width = e.clientX + 'px';
-});
-document.addEventListener('mouseup',()=>isResizing=false);
-// Handle image paste or drag-drop
-editor.getWrapperElement().addEventListener('paste', handleImage);
-editor.getWrapperElement().addEventListener('drop', handleImage);
-
-function handleImage(e) {
-  const files = e.clipboardData?.files || e.dataTransfer?.files;
-  if (!files) return;
-  
-  for (let file of files) {
-    if (!file.type.startsWith('image/')) continue;
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      // Insert as Markdown image at cursor
-      const doc = editor.getDoc();
-      const pos = doc.getCursor();
-      doc.replaceRange(`![image](${ev.target.result})\n`, pos);
-      updatePreview();
-    };
-    reader.readAsDataURL(file); // Convert to base64
-  }
-
-  e.preventDefault();
-}
+  // Initial Load
+  editor.setValue(localStorage.getItem("readme_autosave") || "# Welcome\nStart typing or paste an image!");
 </script>
-
 </body>
 </html>
-
